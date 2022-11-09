@@ -12,6 +12,24 @@ public class FarmGrid : MonoBehaviour
     public GameObject[] currentGrid;
 
     public bool gotGrid;
+
+    //new
+    public GameObject hitted;
+    public GameObject field;
+
+    private RaycastHit _Hit;
+
+    public bool creatingFields;
+    //end
+
+    public Texture2D basicCursor, fieldCursor;
+    public CursorMode cursorMode = CursorMode.Auto;
+    public Vector2 hotSpot = Vector2.zero;
+
+    void Awake()
+    {
+        Cursor.SetCursor(basicCursor, hotSpot, cursorMode);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -30,5 +48,38 @@ public class FarmGrid : MonoBehaviour
 
             gotGrid = true;
         }
+
+        //new
+        if(Input.GetMouseButtonDown (0))
+        {
+            if(Physics.Raycast (Camera.main.ScreenPointToRay (Input.mousePosition), out _Hit))
+            {
+                if(creatingFields == true)
+                {
+                    if(_Hit.transform.tag == "grid")
+                    {
+                        hitted = _Hit.transform.gameObject;
+                        Instantiate(field,hitted.transform.position, Quaternion.identity);
+                        Destroy(hitted);
+                    }
+                }
+            }
+        }
+        if(creatingFields == true)
+        {
+            Cursor.SetCursor(fieldCursor, hotSpot, cursorMode);
+        }
     }
+
+    //new3
+    public void CreateFields()
+    {
+        creatingFields = true;
+    }
+
+    public void returnToNormality()
+    {
+        creatingFields = false;
+    }
+    //end3
 }
