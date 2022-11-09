@@ -26,6 +26,10 @@ public class FarmGrid : MonoBehaviour
     public CursorMode cursorMode = CursorMode.Auto;
     public Vector2 hotSpot = Vector2.zero;
 
+    public GameObject goldSystem;
+
+    public int fieldsPrice;
+
     void Awake()
     {
         Cursor.SetCursor(basicCursor, hotSpot, cursorMode);
@@ -56,11 +60,13 @@ public class FarmGrid : MonoBehaviour
             {
                 if(creatingFields == true)
                 {
-                    if(_Hit.transform.tag == "grid")
+                    if(_Hit.transform.tag == "grid" && goldSystem.GetComponent<GoldSystem>().gold >= fieldsPrice)
                     {
                         hitted = _Hit.transform.gameObject;
                         Instantiate(field,hitted.transform.position, Quaternion.identity);
                         Destroy(hitted);
+
+                        goldSystem.GetComponent<GoldSystem>().gold -= fieldsPrice;
                     }
                 }
             }
