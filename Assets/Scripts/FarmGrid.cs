@@ -5,7 +5,6 @@ using UnityEngine;
 public class FarmGrid : MonoBehaviour
 {
     public int columnLength, rowLength;
-
     public float xSpace, zSpace;
 
     public GameObject grass;
@@ -22,13 +21,14 @@ public class FarmGrid : MonoBehaviour
     public bool creatingFields;
     //end
 
-    public Texture2D basicCursor, fieldCursor;
+    public Texture2D basicCursor, fieldCursor, seedCursor;
     public CursorMode cursorMode = CursorMode.Auto;
     public Vector2 hotSpot = Vector2.zero;
 
     public GameObject goldSystem;
-
     public int fieldsPrice;
+
+    public  GameObject seed;
 
     void Awake()
     {
@@ -53,7 +53,6 @@ public class FarmGrid : MonoBehaviour
             gotGrid = true;
         }
 
-        //new
         if(Input.GetMouseButtonDown (0))
         {
             if(Physics.Raycast (Camera.main.ScreenPointToRay (Input.mousePosition), out _Hit))
@@ -69,15 +68,47 @@ public class FarmGrid : MonoBehaviour
                         goldSystem.GetComponent<GoldSystem>().gold -= fieldsPrice;
                     }
                 }
+
+                if(Product.isSowing == true)
+                {
+                    if(_Hit.transform.tag == "field" && goldSystem.GetComponent<GoldSystem>().gold >= Product.currentProductPrice)
+                    {
+                        hitted = _Hit.transform.gameObject;
+                        Instantiate(seed,hitted.transform.position, Quaternion.identity);
+                        Destroy(hitted);
+
+                        goldSystem.GetComponent<GoldSystem>().gold -= Product.currentProductPrice;
+                    }
+                }
             }
         }
+
         if(creatingFields == true)
         {
             Cursor.SetCursor(fieldCursor, hotSpot, cursorMode);
+
+            Product.isSowing = false;
+        }
+
+        if(Shop.beInShop == true)
+        {
+            creatingFields = false;
+            Cursor.SetCursor(basicCursor, hotSpot, cursorMode);
+        }
+
+        if(Product.isSowing == true)
+        {
+            creatingFields = false;
+            Cursor.SetCursor(seedCursor, hotSpot, cursorMode);
+        }
+
+        if(Input.GetMouseButtonDown(1))
+        {
+            ClearCursor();
         }
     }
 
-    //new3
+
     public void CreateFields()
     {
         creatingFields = true;
@@ -87,5 +118,13 @@ public class FarmGrid : MonoBehaviour
     {
         creatingFields = false;
     }
-    //end3
+    
+
+    public void ClearCursor()
+    {
+        creatingFields = false;
+        Product.isSowing = false;
+
+        Cursor.SetCursor(basicCursor, hotSpot, cursorMode);
+    }
 }

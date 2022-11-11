@@ -7,23 +7,49 @@ public class Product : MonoBehaviour
 {
     public GameObject shop;
 
+    public GameObject goldSystem;
+
     public int id;
     public string productName;
     public int price;
 
     public Text nameText, priceText;
-    // Start is called before the first frame update
+    
+    public static bool placeSeeds;
+    public static int whichSeed;
+
+    public static bool isSowing;
+    public static int currentProductPrice;
+
+
     void Start()
     {
-        shop = GameObject.Find("shop");
+        shop = GameObject.Find("Shop");
 
-        productName = shop.GetComponent<Shop>().productName[id];
-        price = shop.GetComponent<Shop>().price[id];
+       goldSystem = GameObject.Find("Gold System");
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        nameText.text = "" + productName;
+        priceText.text = price + " $";
+
+        productName = shop.GetComponent<Shop>().productName[id];
+        price = shop.GetComponent<Shop>().price[id];
+    }
+
+    public void Buy()
+    {
+        if(goldSystem.GetComponent<GoldSystem>().gold >=price)
+        {
+            placeSeeds = true;
+            whichSeed = id;
+            //sgoldSystem.GetComponent<GoldSystem>().gold -= price;
+
+            currentProductPrice = price;
+
+            isSowing = true;
+        }
     }
 }
