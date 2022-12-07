@@ -5,15 +5,15 @@ using UnityEngine;
 public class Shop : MonoBehaviour
 {
     public int[] id;
-    public  string[] productName;
+    public string[] productName;
 
     public int[] price;
     public int numberOfProducts;
 
     public GameObject shopWindow;
-    
+
     public GameObject[] products;
-        
+
     public int pageNumber;
 
     public static bool beInShop;
@@ -31,11 +31,11 @@ public class Shop : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Product.isSowing == true)
+        if (Product.isSowing == true)
         {
             CloseShop();
         }
-        
+
     }
 
     public void OpenShop()
@@ -55,7 +55,7 @@ public class Shop : MonoBehaviour
 
     public void Refresh()
     {
-        for(int i=0; i<numberOfProducts; i++)
+        for (int i = 0; i < numberOfProducts; i++)
         {
             products[i].SetActive(false);
         }

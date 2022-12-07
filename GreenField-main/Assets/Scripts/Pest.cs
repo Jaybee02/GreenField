@@ -15,7 +15,7 @@ public class Pest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-       //farmGrid = GetComponent<FarmGrid>();
+        //farmGrid = GetComponent<FarmGrid>();
     }
 
     // Update is called once per frame
@@ -28,7 +28,7 @@ public class Pest : MonoBehaviour
         //    Instantiate(Object, Location);
         //    ToSpawn = false;
         //    StartCoroutine(ToSpawnTrue());
-            
+
         //}
     }
 

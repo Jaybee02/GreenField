@@ -13,7 +13,7 @@ public class PlayerManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-       StartCoroutine(SetUpRoutine()); 
+        StartCoroutine(SetUpRoutine());
     }
 
     IEnumerator SetUpRoutine()
@@ -28,9 +28,10 @@ public class PlayerManager : MonoBehaviour
         {
             if (response.success)
             {
-            Debug.Log("Player name is set!");
+                Debug.Log("Player name is set!");
                 success.gameObject.SetActive(true);
-            } else
+            }
+            else
             {
                 Debug.Log("Player name not set " + response.Error);
                 error.gameObject.SetActive(true);
@@ -49,7 +50,8 @@ public class PlayerManager : MonoBehaviour
                 Debug.Log("Player was logged in");
                 PlayerPrefs.SetString("PlayerID", response.player_id.ToString());
                 done = true;
-            } else
+            }
+            else
             {
                 // player can still play without login
                 Debug.Log("Could not start session");

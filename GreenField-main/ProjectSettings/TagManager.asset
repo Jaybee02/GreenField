@@ -21,6 +21,8 @@ TagManager:
   - Chicken
   - plant
   - beet_dry
+  - wet_field
+  - water
   layers:
   - Default
   - TransparentFX

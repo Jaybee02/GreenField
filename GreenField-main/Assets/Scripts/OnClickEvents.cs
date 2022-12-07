@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OnClickEvents: MonoBehaviour
+public class OnClickEvents : MonoBehaviour
 {
     public GameObject gamePausedPanel;
     public GameObject buttonsPanel;
@@ -12,6 +12,7 @@ public class OnClickEvents: MonoBehaviour
     public GameObject leaderBoardPanel;
     public GameObject changeNamePanel;
     public GameObject aboutUsPanel;
+    public GameObject errorpanel;
     //private AudioSource gameAudio;
     //public AudioClip gameOverSound;
 
@@ -19,7 +20,7 @@ public class OnClickEvents: MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-      //  gameAudio = GetComponent<AudioSource>();
+        //  gameAudio = GetComponent<AudioSource>();
     }
     public void Pause()
     {
@@ -31,7 +32,7 @@ public class OnClickEvents: MonoBehaviour
     }
 
     // Update is called once per frame
-   public void Resume()
+    public void Resume()
     {
         gamePausedPanel.SetActive(false);
         aboutPanel.SetActive(false);
@@ -68,6 +69,8 @@ public class OnClickEvents: MonoBehaviour
     {
         gameOverPanel.SetActive(true);
         buttonsPanel.SetActive(false);
+        // gameAudio.PlayOneShot(gameOverSound, 1.0f);
+        //Time.timeScale = 0;        
     }
 
     public void LeaderBoard()
@@ -75,27 +78,24 @@ public class OnClickEvents: MonoBehaviour
         leaderBoardPanel.SetActive(true);
         gameObject.SetActive(false);
         gamePausedPanel.SetActive(false);
-        buttonsPanel.SetActive(false);
     }
 
     public void Close()
     {
-        leaderBoardPanel.SetActive(false );
+        leaderBoardPanel.SetActive(false);
         buttonsPanel.SetActive(true);
+        errorpanel.SetActive(false);
     }
 
     public void ChangeName()
     {
         changeNamePanel.SetActive(true);
         gamePausedPanel.SetActive(false);
-        buttonsPanel.SetActive(false);
     }
 
     public void AboutUs()
     {
         aboutUsPanel.SetActive(true);
         buttonsPanel.SetActive(false);
-        buttonsPanel.SetActive(false);
     }
-
 }

@@ -26,7 +26,7 @@ public class Barn : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        for(int i = 0; i < storageSize; i++)
+        for (int i = 0; i < storageSize; i++)
         {
             sellingPrice[i] = priceTable.GetComponent<Price>().sellingPrice[id[i]];
 

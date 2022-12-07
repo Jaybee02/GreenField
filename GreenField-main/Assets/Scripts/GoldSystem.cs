@@ -12,7 +12,6 @@ public class GoldSystem : MonoBehaviour
     public int totalCropsInBarn;
 
     public OnClickEvents onClick;
-   // public LeaderBoard leaderBoard;
     public FarmGrid grid;
     // Start is called before the first frame update
     void Start()
@@ -25,10 +24,9 @@ public class GoldSystem : MonoBehaviour
     {
         goldText.text = "Wallet: ₦" + gold;
 
-        if(gold == 0 && grid.Total() == 0)
+        if (gold == 0 && grid.Total() == 0)
         {
             onClick.GameOver();
-          //  leaderBoard.SubmitScore(grid.Profit());
         }
     }
 }

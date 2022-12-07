@@ -17,7 +17,7 @@ public class Seed : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     IEnumerator Wait()

@@ -1,4 +1,6 @@
 using EasyUI.BarnEmpty;
+using EasyUI.PopUp;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,22 +16,27 @@ public class FarmGrid : MonoBehaviour
     public bool gotGrid;
 
     public GameObject hitted;
+    public GameObject wet_field;
     public GameObject field;
     public GameObject soil;
     public GameObject grid;
+    public GameObject water;
 
     private RaycastHit _Hit;
 
     public bool creatingFields;
+    public bool isWatering;
 
-    public Texture2D basicCursor, fieldCursor, seedCursor;
+    public Texture2D basicCursor, fieldCursor, seedCursor, waterCursor;
     public CursorMode cursorMode = CursorMode.Auto;
     public Vector2 hotSpot = Vector2.zero;
 
     public GameObject goldSystem;
-    public int fieldsPrice;
+    public int fieldPrice;
+    public int waterPrice;
+    public int harvestPrice;
 
-    public  GameObject[] seeds;
+    public GameObject[] seeds;
 
     public TextMeshProUGUI maizeHarvestText;
     public TextMeshProUGUI tomatoesHarvestText;
@@ -38,6 +45,9 @@ public class FarmGrid : MonoBehaviour
     public TextMeshProUGUI bellHarvestText;
     public TextMeshProUGUI melonHarvestText;
     public TextMeshProUGUI cabbageHarvestText;
+    public TextMeshProUGUI error;
+
+
     public static int maizeHarvest;
     public static int carrotHarvest;
     public static int beetHarvest;
@@ -59,6 +69,7 @@ public class FarmGrid : MonoBehaviour
 
     public BarnEmpty barnEmpty;
     public GoldSystem GoldSystem;
+    private OnClickEvents onClick;
 
     public Text profitText;
     public static int profit;
@@ -86,29 +97,32 @@ public class FarmGrid : MonoBehaviour
     public Sprite imageOne;
     public Sprite imageTwo;
     public Sprite imageThree;
+    public Sprite imageFour;
     public SpriteRenderer image;
 
-    //public Image cursorPointer;
+    bool isDry;
+
+    public GameObject wetLandPanel;
+    public GameObject errorPanel;
 
 
     // public Timer timer;
     void Awake()
     {
-        //Cursor.SetCursor(basicCursor, hotSpot, cursorMode);
         ClearCursor();
-        image.sprite = imageOne;
     }
     // Start is called before the first frame update
     void Start()
     {
 
-        for(int i =0; i < columnLength*rowLength; i++)
+        for (int i = 0; i < columnLength * rowLength; i++)
         {
-            Instantiate(grass, new Vector3(xSpace +(xSpace * (i % columnLength)), 0, zSpace + (zSpace * (i / columnLength))), Quaternion.identity);
+            Instantiate(grass, new Vector3(xSpace + (xSpace * (i % columnLength)), 0, zSpace + (zSpace * (i / columnLength))), Quaternion.identity);
         }
 
         barnEmpty = GetComponent<BarnEmpty>();
         GoldSystem = GetComponent<GoldSystem>();
+        onClick = GetComponent<OnClickEvents>();
         // gameAudio = GetComponent<AudioSource>();
         image = GetComponent<SpriteRenderer>();
 
@@ -131,7 +145,7 @@ public class FarmGrid : MonoBehaviour
         totalCropsInBarn = 0;
 
 
-       // timer = GetComponent<Timer>();
+        // timer = GetComponent<Timer>();
         timerIsRunning = true;
 
 
@@ -140,7 +154,7 @@ public class FarmGrid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(gotGrid == false)
+        if (gotGrid == false)
         {
             currentGrid = GameObject.FindGameObjectsWithTag("grid");
             gotGrid = true;
@@ -148,37 +162,55 @@ public class FarmGrid : MonoBehaviour
 
 
         if (Input.GetMouseButtonDown(0))
-         {
-              if(Physics.Raycast (Camera.main.ScreenPointToRay (Input.mousePosition), out _Hit))
+        {
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out _Hit))
             {
                 // Create New Field
 
-                if(creatingFields == true)
+                if (creatingFields == true)
                 {
-                    if(_Hit.transform.tag == "grid" && goldSystem.GetComponent<GoldSystem>().gold >= fieldsPrice)
+                    CreateFields();
+                    if (_Hit.transform.tag == "grid" && goldSystem.GetComponent<GoldSystem>().gold >= fieldPrice)
                     {
                         hitted = _Hit.transform.gameObject;
-                        Instantiate(field,hitted.transform.position, Quaternion.identity);
+                        Instantiate(field, hitted.transform.position, Quaternion.identity);
                         Destroy(hitted);
 
-                        goldSystem.GetComponent<GoldSystem>().gold -= fieldsPrice;
+                        goldSystem.GetComponent<GoldSystem>().gold -= fieldPrice;
                     }
-                       // gameAudio.PlayOneShot(gridSound, 1.0f);
+                    // gameAudio.PlayOneShot(gridSound, 1.0f);
+                }
+
+                // water field
+                if (isDry == true)
+                {
+                    if (_Hit.transform.tag == "field" && goldSystem.GetComponent<GoldSystem>().gold >= fieldPrice)
+                    {
+                        hitted = _Hit.transform.gameObject;
+                        Instantiate(wet_field, hitted.transform.position, Quaternion.identity);
+                        Destroy(hitted);
+
+                        goldSystem.GetComponent<GoldSystem>().gold -= waterPrice;
+                    }
                 }
 
                 // Sow seed
 
-                if(Product.isSowing == true)
+                if (Product.isSowing == true)
                 {
-                    if(_Hit.transform.tag == "field" && goldSystem.GetComponent<GoldSystem>().gold >= Product.currentProductPrice)
+                    if (_Hit.transform.tag == "wet_field" && goldSystem.GetComponent<GoldSystem>().gold >= Product.currentProductPrice)
                     {
                         hitted = _Hit.transform.gameObject;
-                        Instantiate(seeds[Product.whichSeed],hitted.transform.position, Quaternion.identity);
+                        Instantiate(seeds[Product.whichSeed], hitted.transform.position, Quaternion.identity);
                         Destroy(hitted);
 
                         goldSystem.GetComponent<GoldSystem>().gold -= Product.currentProductPrice;
                     }
-                        //gameAudio.PlayOneShot(sowSound, 1.0f);
+                    else if (_Hit.transform.tag == "field" && goldSystem.GetComponent<GoldSystem>().gold >= Product.currentProductPrice)
+                    {
+
+                        errorPanel.SetActive(true);
+                    }
                 }
 
                 // change harvested land to field
@@ -190,14 +222,14 @@ public class FarmGrid : MonoBehaviour
                         hitted = _Hit.transform.gameObject;
                         Instantiate(grid, hitted.transform.position, Quaternion.identity);
                         Destroy(hitted);
-                        goldSystem.GetComponent<GoldSystem>().gold -= 5;
+                        goldSystem.GetComponent<GoldSystem>().gold -= harvestPrice;
                     }
-                     //   gameAudio.PlayOneShot(harvestSound, 1.0f);
+                    //   gameAudio.PlayOneShot(harvestSound, 1.0f);
                 }
 
                 //HARVESTING SYSTEM
 
-                if (creatingFields != true && Product.isSowing != true)
+                if (creatingFields != true && Product.isSowing != true && isDry != true)
                 {
                     if (_Hit.transform.tag == "maize")
                     {
@@ -208,7 +240,7 @@ public class FarmGrid : MonoBehaviour
                         maizeHarvestText.text = maizeHarvest.ToString();
                         maizeHarvest++;
                         maizeHarvest2++;
-                        
+
                     }
 
                     if (_Hit.transform.tag == "tomatoes")
@@ -278,18 +310,17 @@ public class FarmGrid : MonoBehaviour
                     }
 
                     totalCropsInBarn = maizeHarvest2 + tomatoesHarvest2 + carrotHarvest2 + beetHarvest2 + bellHarvest2 + cabbageHarvest2 + melonHarvest2;
-                    if(totalCropsInBarn == 0)
+                    if (totalCropsInBarn == 0)
                     {
                         totalCropsInBarnText.text = "0";
-                    } else
+                    }
+                    else
                     {
-                    totalCropsInBarnText.text = totalCropsInBarn.ToString();
+                        totalCropsInBarnText.text = totalCropsInBarn.ToString();
 
                     }
-
                 }
             }
-            
         }
 
 
@@ -297,23 +328,35 @@ public class FarmGrid : MonoBehaviour
         {
             Cursor.SetCursor(fieldCursor, hotSpot, cursorMode);
             Product.isSowing = false;
+            isDry = false;
             image.sprite = imageOne;
+        }
+
+        if (isDry == true)
+        {
+            // Cursor.SetCursor(waterCursor, hotSpot, cursorMode);
+            // image.sprite = imageFour;
+            creatingFields = false;
+            Product.isSowing = false;
+
         }
 
         if (Shop.beInShop == true)
         {
             creatingFields = false;
+            isDry = false;
             Cursor.SetCursor(basicCursor, hotSpot, cursorMode);
         }
 
         if (Product.isSowing == true)
         {
             creatingFields = false;
+            isDry = false;
             Cursor.SetCursor(seedCursor, hotSpot, cursorMode);
             image.sprite = imageTwo;
         }
 
-        if(Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1))
         {
             ClearCursor();
         }
@@ -323,7 +366,7 @@ public class FarmGrid : MonoBehaviour
 
     public void StartTimer()
     {
-        if (maizeHarvest >=1 && timeRemaining > 0)
+        if (maizeHarvest >= 1 && timeRemaining > 0)
         {
             timeRemaining -= Time.deltaTime;
             timerText.text = Mathf.Round(timeRemaining).ToString();
@@ -342,6 +385,8 @@ public class FarmGrid : MonoBehaviour
     public void Close()
     {
         barnEmpty.canvas.SetActive(false);
+        errorPanel.SetActive(true);
+        print("close");
     }
 
     public void CreateFields()
@@ -352,15 +397,35 @@ public class FarmGrid : MonoBehaviour
     public void ReturnToNormality()
     {
         creatingFields = false;
-    }    
+        isDry = false;
+    }
 
     public void ClearCursor()
     {
         creatingFields = false;
         Product.isSowing = false;
+        isDry = false;
 
         Cursor.SetCursor(basicCursor, hotSpot, cursorMode);
-        image.sprite=imageThree;
+        image.sprite = imageThree;
+    }
+
+    public void WaterLand()
+    {
+
+        if (isDry == false)
+        {
+            Product.isSowing = false;
+            isDry = true;
+            creatingFields = false;
+        }
+
+    }
+
+    public void ClosePanel()
+    {
+        errorPanel.SetActive(false);
+
     }
 
     public int Total()
@@ -374,7 +439,7 @@ public class FarmGrid : MonoBehaviour
     {
         if (maizeHarvest > 1)
         {
-            goldSystem.GetComponent<GoldSystem>().gold += 30;
+            goldSystem.GetComponent<GoldSystem>().gold += 40;
             maizeHarvest--;
             maizeHarvest2--;
             maizeHarvestText.text = maizeHarvest2.ToString();
@@ -393,7 +458,7 @@ public class FarmGrid : MonoBehaviour
     {
         if (tomatoesHarvest > 1)
         {
-            goldSystem.GetComponent<GoldSystem>().gold += 40;
+            goldSystem.GetComponent<GoldSystem>().gold += 50;
             tomatoesHarvest--;
             tomatoesHarvest2--;
             tomatoesHarvestText.text = tomatoesHarvest2.ToString();
@@ -412,7 +477,7 @@ public class FarmGrid : MonoBehaviour
     {
         if (carrotHarvest > 1)
         {
-            goldSystem.GetComponent<GoldSystem>().gold += 50;
+            goldSystem.GetComponent<GoldSystem>().gold += 60;
             carrotHarvest--;
             carrotHarvest2--;
             carrotHarvestText.text = carrotHarvest2.ToString();
@@ -431,7 +496,7 @@ public class FarmGrid : MonoBehaviour
     {
         if (beetHarvest > 1)
         {
-            goldSystem.GetComponent<GoldSystem>().gold += 60;
+            goldSystem.GetComponent<GoldSystem>().gold += 70;
             beetHarvest--;
             beetHarvest2--;
             beetHarvestText.text = beetHarvest2.ToString();
@@ -450,7 +515,7 @@ public class FarmGrid : MonoBehaviour
     {
         if (bellHarvest > 1)
         {
-            goldSystem.GetComponent<GoldSystem>().gold += 70;
+            goldSystem.GetComponent<GoldSystem>().gold += 80;
             bellHarvest--;
             bellHarvest2--;
             bellHarvestText.text = bellHarvest2.ToString();
@@ -469,7 +534,7 @@ public class FarmGrid : MonoBehaviour
     {
         if (melonHarvest > 1)
         {
-            goldSystem.GetComponent<GoldSystem>().gold += 80;
+            goldSystem.GetComponent<GoldSystem>().gold += 90;
             melonHarvest--;
             melonHarvest2--;
             melonHarvestText.text = melonHarvest2.ToString();
@@ -488,7 +553,7 @@ public class FarmGrid : MonoBehaviour
     {
         if (cabbageHarvest > 1)
         {
-            goldSystem.GetComponent<GoldSystem>().gold += 90;
+            goldSystem.GetComponent<GoldSystem>().gold += 100;
             cabbageHarvest--;
             cabbageHarvest2--;
             cabbageHarvestText.text = cabbageHarvest2.ToString();
